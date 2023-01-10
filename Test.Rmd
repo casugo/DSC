@@ -1,0 +1,63 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+# Load Libraries
+library(tidyverse)
+library(here)
+library(kableExtra)
+library(ggpubr)
+library (dbplyr)
+library(stringr)
+library(haven)
+# Data Loading ----
+## Loading the paths
+files <- 
+  here::here("Data") %>%
+  dir( recursive=TRUE, full.names=TRUE, pattern="\\.txt$")
+## Function to identify the names of the data ----
+names <- 
+  here::here("Data") %>%
+  dir( recursive=TRUE, pattern="\\.txt$")
+
+data_trans <- function(path_file, material ){
+  
+        str_split_fixed(path_file, " ", 5)
+    {#  path_file = files[1]; material = c("BB")
+  
+  table <- read_delim(file = path_file, skip = 9, delim = " ")
+    df<- table %>% 
+        str_split_fixed(path_file, " ", 5)
+    return(df
+    }
+```
+
+
+```{r}
+data <- df %>% set_names(path_file) %>% enframe ("index","T[s]","Ts[°C ]", "Tr[°C ]","Value [Wg^-1]")
+```
+
+
+```{r}
+data <- df %>% set_names(path_file) %>% enframe ("index","T[s]","Ts[°C ]", "Tr[°C ]","Value [Wg^-1]")
+    
+    
+  
+  x <-table[1]
+  names(x)  <-  c("var_x") 
+  y <- names(table)[-1]
+  y <- as.numeric(y)
+  
+  # Making the table
+  data <- tibble( x , var_y = y ) %>% 
+    #set_names("var_x", "var_y") %>% 
+    mutate(Material = material)
+  return(data)
+}
+
+
+```
+
