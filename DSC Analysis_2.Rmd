@@ -14,6 +14,7 @@ library(ggpubr)
 library (dbplyr)
 library(stringr)
 library(haven)
+library (DescTools)
 
 ```
 
@@ -38,6 +39,14 @@ DSC<-DSC %>%
            sep = "/",
            into = c("Material","file"))
 DSC$file <- NULL
+
+```
+
+```{r}
+Area_under_curve <- DSC %>%
+   group_by(Material) %>%
+  mutate(HC = AUC(Datos$Ts, Datos$Value, From= 100, to= 120, method = "step"))
+
 ```
 
 
@@ -53,15 +62,20 @@ DSC<-DSC$Datos %>%  na.omit
 DSC<-DSC %>% unnest(Datos)
 #Delate columns 2,3 and 5
 DSC <<- DSC [, -c(2,3,5)]
-```
 
-
-```{r}
 DSC$Ts <-
   as.numeric(DSC$Ts)
 DSC$Value <-
   as.numeric(DSC$Value)
 ```
+
+```{r}
+Area_under_curve <- DSC %>%
+   group_by(Material) %>%
+  mutate(HC = AUC(DSC$Ts, DSC$Value, From= 100, to= 120, method = "step"))
+
+```
+
 
 
 ```{r}
@@ -84,6 +98,7 @@ ggsave( here("Figures/FTIR.png") , width = 30, height = 20, dpi="print" )
 
 
 ```
+
 
 
 
