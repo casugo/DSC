@@ -1,0 +1,97 @@
+
+```{r}
+#Data Analysis of DSC
+## Date: 05/01/2023
+```
+
+```{r}
+# Load Libraries
+
+library(tidyverse)
+library(here)
+library(kableExtra)
+library(ggpubr)
+library (dbplyr)
+library(stringr)
+library(haven)
+
+```
+
+```{r}
+# Data Loading ----
+## Loading the paths
+files <- 
+  here::here("Data") %>%
+  dir( recursive=TRUE, full.names=TRUE, pattern="\\.csv$")
+
+### Function to identify the names of the data ----
+names <- 
+  here::here("Data") %>%
+  dir( recursive=TRUE, pattern="\\.csv$")
+
+DSC<- files %>% map( ~ read.csv2(.))
+DSC <- DSC %>% set_names(names) %>% enframe ("Material", "Datos")
+
+### Organising the dataframe ----
+DSC<-DSC %>% 
+  separate(Material,
+           sep = "/",
+           into = c("Material","file"))
+DSC$file <- NULL
+```
+
+
+```{r}
+DSC<-DSC$Datos %>%  na.omit
+
+
+```
+
+
+```{r}
+## Unnesting the total dataframe for graphics ----
+DSC<-DSC %>% unnest(Datos)
+#Delate columns 2,3 and 5
+DSC <<- DSC [, -c(2,3,5)]
+```
+
+
+```{r}
+DSC$Ts <-
+  as.numeric(DSC$Ts)
+DSC$Value <-
+  as.numeric(DSC$Value)
+```
+
+
+```{r}
+DSC %>%
+  group_by(Material) %>%
+   ggplot(aes(x = Ts, y = Value, color = Material)) +
+  geom_line()+
+  facet_wrap( ~ Material , ncol=1)
+coord_cartesian(
+  xlim = c(-20, -300),
+  expand = TRUE,
+  default = FALSE,
+  clip = "on")  + 
+  labs(title="Differential scanning calorimetry",  
+       y="Heat flow [w/g]", x="Temperatire [°C] " ) 
+### Saving the Figure
+
+ggsave( here("Figures/FTIR.png") , width = 30, height = 20, dpi="print" )
+
+
+
+```
+
+
+
+```{r}
+geom_text(data = Area_under_curve, 
+            aes(x = c(4, 6, 10,10), y = c(7,7,7,7)), 
+            label = paste( data_mean$mean, data_mean$st, sep = " \u00B1 "), 
+            vjust = 1, 
+            hjust=0) + 
+```
+
