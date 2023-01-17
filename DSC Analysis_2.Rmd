@@ -45,7 +45,11 @@ DSC$file <- NULL
 ```{r}
 Area_under_curve <- DSC %>%
    group_by(Material) %>%
-  mutate(HC = AUC(Datos$Ts, Datos$Value, From= 100, to= 120, method = "step"))
+  mutate(Hc = AUC(Datos$Ts, Datos$Value, From= 100, to= 120, method = "step"))
+
+Area_under_curve <- DSC %>%
+   group_by(Material) %>%
+  mutate(Hm = AUC(Datos$Ts, Datos$Value, From= 130, to= 270, method = "step"))
 
 ```
 
@@ -70,15 +74,6 @@ DSC$Value <-
 ```
 
 ```{r}
-Area_under_curve <- DSC %>%
-   group_by(Material) %>%
-  mutate(HC = AUC(DSC$Ts, DSC$Value, From= 100, to= 120, method = "step"))
-
-```
-
-
-
-```{r}
 DSC %>%
   group_by(Material) %>%
    ggplot(aes(x = Ts, y = Value, color = Material)) +
@@ -89,8 +84,8 @@ coord_cartesian(
   expand = TRUE,
   default = FALSE,
   clip = "on")  + 
-  labs(title="Differential scanning calorimetry",  
-       y="Heat flow [w/g]", x="Temperatire [°C] " ) 
+  #labs(title="Differential scanning calorimetry",  
+   #    y="Heat flow [w/g]", x="Temperatire [°C] " ) 
 ### Saving the Figure
 
 ggsave( here("Figures/FTIR.png") , width = 30, height = 20, dpi="print" )
