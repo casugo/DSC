@@ -10,7 +10,8 @@ library (dbplyr)
 library(stringr)
 library(haven)
 
-
+# AUX
+library(DescTools) # https://search.r-project.org/CRAN/refmans/DescTools/html/AUC.html#:~:text=For%20linear%20interpolation%20the%20AUC,to%20calculate%20a%20numerical%20integral.
 
 # Data Loading ----
 ## Loading the paths
@@ -58,18 +59,20 @@ names(DSC) <- c("Material", "File", "Index", "Time", "Ts", "Tr", "Value")
 
 DSC %>% 
   ggplot()+
-  aes(x = Time, )
+  aes(x = Time, y = Value, color = Material) +
+  geom_line() +
+  coord_cartesian(xlim = c(2400 , 2600))
+  
+facet_wrap( ~ Material, ncol = 1 )
 
-#Delate columns 2,3 and 5
-DSC <<- DSC [, -c(2,3,5)]
+## Calculating the Area Under the Curve
 
-DSC$Ts <-
-  as.numeric(DSC$Ts)
-DSC$Value <-
-  as.numeric(DSC$Value)
+AUC <- DSC %>% 
+  filter(Time > 2400, Time <2600) %>% 
+  group_by(Material) %>% 
+  summarise(
+    AUC_Value = AUC( x = Time, y = Value) # Evaluating the AUC but filterint between Time 2400 - 2600
+  )
 
-BB_Hc <- 
-  DSC$Material$BB %>%
-  ?AUC(DSC$Ts, DSC$Value, From= 100, to= 120, method = "step")
 
 
