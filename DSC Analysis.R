@@ -1,6 +1,17 @@
 #Data Analysis of DSC
 ## Date: 05/01/2023
 
+## Loading the data
+
+# TAsk:
+# Find the area under de curve (AUC) of the three materials and for each in the crystallinity
+#   (ΔHc) (second set of data) and melting curve (ΔHm) (third set of data).
+#   Explantion: when we perform a DSC test you have to heat the material in order to see the melting point, in this case,
+#   BB (From -20 to 270 °C), rHDPE (20 - 250 °C) n rPET (20-270) (first set of data) . Then the
+#   material is cold down with the inverse tempertures to see its crystallization (second set).
+#   Finally, heated again to see the real melting point (third set of data).
+
+
 # Load Libraries
 library(tidyverse)
 library(here)
@@ -53,25 +64,87 @@ DSC$Tr <- as.numeric(DSC$Tr)
 DSC$Value <- as.numeric(DSC$Value)
 
 ## Changing the colnames
-names(DSC) <- c("Material", "File", "Index", "Time", "Ts", "Tr", "Value")
+names(DSC) <- c("Material", "Index", "Time", "Ts", "Tr", "Value")
 
-## Graphique
 
+
+
+## Graphique of the Profile
 DSC %>% 
   ggplot()+
-  aes(x = Time, y = Value, color = Material) +
+  aes(x = Time, y = Ts, color = Material) +
+  facet_wrap( ~ Material, ncol = 1 ) +
   geom_line() +
-  coord_cartesian(xlim = c(2400 , 2600))
+  coord_cartesian(xlim = c(1700 , 2000))  
+
+
+##
+DSC %>% 
+  ggplot()+
+  aes(x = Ts, y = Value, color = Material) +
+  facet_wrap( ~ Material, ncol = 1 ) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Ts)) 
+#  coord_cartesian(xlim = c(2400 , 2600)) + 
+
   
-facet_wrap( ~ Material, ncol = 1 )
+#  CRISTALINIZACION  -------
 
-## Calculating the Area Under the Curve
-
-AUC <- DSC %>% 
-  filter(Time > 2400, Time <2600) %>% 
+## Calculating the min and max lines----
+Table_Max <- 
+  DSC %>% 
+  filter(Time > 1000 & Time < 2200) %>% 
   group_by(Material) %>% 
+  slice_max(Ts, n = 1) %>% 
+  arrange(Material, Time) %>% 
+  select(Material, Time) %>% 
+  set_names("Material", "Time.t1")
+
+Table_Min <- 
+  DSC %>% filter(Time > 2200, Time < 4200 ) %>% 
+  group_by(Material) %>% 
+  slice_min(Ts, n = 1) %>% 
+  arrange(Material, Time) %>% 
+  select(Material, Time) %>% 
+  set_names("Material", "Time.t2")
+
+Criteria <- 
+  Table_Max %>% left_join(Table_Min, by = "Material")
+
+rm(Table_Max, Table_Min)
+## Filtering the Database for the Cristalization process  
+
+Cristallization <- 
+  DSC %>% 
+  group_by(Material) %>%
+  inner_join(Criteria) %>% 
+  filter(Time > Time.t1 & Time < Time.t2)
+
+## Graphiques de Cristallization
+Cristallization %>% 
+  ggplot()+
+  aes(x = Ts, y = Value, color = Material) +
+  facet_wrap( ~ Material, ncol = 1 ) +
+  geom_line() +
+  coord_cartesian(xlim = c(95 , 210))
+  #geom_point(size = 1) 
+
+## Calculating the Area Under the Curve ----
+
+AUC_cristal <- 
+  tibble(
+    Material = c("pBC", "rHDPE", "rPET"),
+    Temp.1 = c(200, 95, 183),
+    Temp.2 = c(216, 121, 210))
+
+
+AUC_value <- 
+  Cristallization %>% 
+  group_by(Material) %>%
+  inner_join(AUC_cristal, by = "Material") %>% 
+  filter(Ts > Temp.1 & Ts < Temp.2 ) %>% 
   summarise(
-    AUC_Value = AUC( x = Time, y = Value) # Evaluating the AUC but filterint between Time 2400 - 2600
+    AUC_Value = AUC( x = Ts, y = Value) # Evaluating the AUC but filterint between Time 2400 - 2600
   )
 
 
