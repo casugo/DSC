@@ -144,7 +144,7 @@ AUC_value <-
   inner_join(AUC_cristal, by = "Material") %>% 
   filter(Ts > Temp.1 & Ts < Temp.2 ) %>% 
   summarise(
-    AUC_Value = AUC( x = Ts, y = Value) # Evaluating the AUC but filterint between Time 2400 - 2600
+    AUC_Value = AUC( x = Ts, y = Value) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
   )
 
 
