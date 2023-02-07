@@ -154,6 +154,14 @@ Cristallization %>%
                aes(x = Ts, 
                    y = Value, 
                    fill = Material),
-               )
+               ) +
+  labs(title = "This is the Cristallization",
+       subtitle = "for the Three materials",
+       x = "Axix X",
+       y = "Axis Y",
+       caption = "Made from love") +
+  theme_minimal()
+
+ggsave("Cristallization.jpg", width = 7, height = 5, dpi = "print")
 
 
