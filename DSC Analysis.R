@@ -120,17 +120,7 @@ Cristallization <-
   inner_join(Criteria) %>% 
   filter(Time > Time.t1 & Time < Time.t2)
 
-## Graphiques de Cristallization
-Cristallization %>% 
-  ggplot()+
-  aes(x = Ts, y = Value, color = Material) +
-  facet_wrap( ~ Material, ncol = 1 ) +
-  geom_line() +
-  coord_cartesian(xlim = c(95 , 210))
-  #geom_point(size = 1) 
-
 ## Calculating the Area Under the Curve ----
-
 AUC_cristal <- 
   tibble(
     Material = c("pBC", "rHDPE", "rPET"),
@@ -142,10 +132,28 @@ AUC_value <-
   Cristallization %>% 
   group_by(Material) %>%
   inner_join(AUC_cristal, by = "Material") %>% 
-  filter(Ts > Temp.1 & Ts < Temp.2 ) %>% 
+  filter(Ts > Temp.1 & Ts < Temp.2 ) 
+  
+
+Table_AUC_value <- 
+  AUC_value  %>% 
   summarise(
     AUC_Value = AUC( x = Ts, y = Value) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
   )
 
+
+## Graphiques de Cristallization with the calculation of the Area Under the Curve
+Cristallization %>% 
+  ggplot()+
+  aes(x = Ts, y = Value, color = Material) +
+  facet_wrap( ~ Material, ncol = 1 ) +
+  geom_line() +
+  coord_cartesian(xlim = c(95 , 210)) +
+  #geom_point(size = 1) 
+  geom_polygon(data = AUC_value, 
+               aes(x = Ts, 
+                   y = Value, 
+                   fill = Material),
+               )
 
 
