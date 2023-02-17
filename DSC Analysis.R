@@ -125,8 +125,8 @@ Cristallization <-
 AUC_cristal <- 
   tibble(
     Material = c("pBC", "rHDPE", "rPET"),
-    Temp.1 = c(200, 95, 183),
-    Temp.2 = c(216, 121, 210))
+    Temp.1 = c(110, 95, 183),
+    Temp.2 = c(125, 121, 210))
 
 
 AUC_value <- 
@@ -173,10 +173,10 @@ Cristallization %>%
                    y = Value, 
                    fill = Material),
                ) +
-  labs(title = "This is the Cristallization",
-       subtitle = "for the Three materials",
-       x = "Axis X",
-       y = "Axis Y",
+  labs(title = "Cristallization curves",
+       #subtitle = "",
+       x = "Temperature [°C]",
+       y = "Heating flow [W/g]",
        caption = "Made from love") +
   theme_minimal()
 
@@ -222,8 +222,8 @@ Melting <-
 AUC_Melt <- 
   tibble(
     Material = c("pBC", "rHDPE", "rPET"),
-    Temp.3 = c(230, 120, 210),
-    Temp.4 = c(260, 150, 260))
+    Temp.3 = c(120, 120, 210),
+    Temp.4 = c(140, 150, 260))
 
 AUC_value_Melt <- 
   Melting %>% 
@@ -255,6 +255,52 @@ Table_Peak_Melt <-
     Peak_Melt = findpeaks ( Value,npeaks=1, sortstr= FALSE ) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
   )
 
+## Transforming the column into numeric
+Peak_Melt$Temp.peak <- as.numeric(Peak_Melt$Temp.peak)
+
+## Graphiques of Melting  with the calculation of the Area Under the Curve
+Melting %>% 
+  ggplot()+
+  aes(x = Ts, y = Value, color = Material) +
+  facet_wrap( ~ Material, ncol = 1 ) +
+  geom_line() +
+  coord_cartesian(xlim = c(100 , 270)) +
+  #geom_point(size = 1) 
+  geom_polygon(data = AUC_value_Melt, 
+               aes(x = Ts, 
+                   y = Value, 
+                   fill = Material)+
+  geom_text(data = Peak_Melt, 
+                  aes(x = c(250, 130, 250), y = c(-1,-3,-1)), 
+                  label = Peak_Melt$Temp.peak,
+                  vjust = 1,
+                  hjust=0),
+  )+
+  labs(title = "Melting curves",
+      # subtitle = "for the Three materials",
+       x = "Temperature [°C]",
+       y = "Heating flow [W/g]",
+       caption = "Made from love") +
+  theme_minimal()
+
+ggsave("Melting.jpg", width = 7, height = 5, dpi = "print")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Graphiques of Melting  with the calculation of the Area Under the Curve
 Melting %>% 
@@ -269,11 +315,39 @@ Melting %>%
                    y = Value, 
                    fill = Material),
   ) +
-  labs(title = "This is the Melting",
-       subtitle = "for the Three materials",
-       x = "Axis X",
-       y = "Axis Y",
+  labs(title = "Melting curves",
+       # subtitle = "for the Three materials",
+       x = "Temperature [°C]",
+       y = "Heating flow [W/g]",
        caption = "Made from love") +
   theme_minimal()
 
 ggsave("Melting.jpg", width = 7, height = 5, dpi = "print")
+
+
+
+## Graphiques of Melting  pBC
+Melting %>% 
+  ggplot()+
+  aes(x = Ts, y = Value) +
+  facet_wrap( ~ pBC, ncol = 1 ) +
+  geom_line() +
+  coord_cartesian(xlim = c(100 , 270)) +
+  #geom_point(size = 1) 
+  geom_polygon(data = AUC_value_Melt, 
+               aes(x = Ts, 
+                   y = Value, 
+                   )+
+                 geom_text(data = Peak_Melt   , 
+                           aes(x = c(4, 6, 10), y = c(7,7,7)), 
+                           label = paste( Table_Peak_Melt),
+                           hjust=0),
+  ) +
+  labs(title = "Melting curve",
+       # subtitle = "for the Three materials",
+       x = "Temperature [°C]",
+       y = "Heating flow [W/g]",
+       caption = "Made from love") +
+  theme_minimal()
+
+ggsave("Melting/pBC.jpg", width = 7, height = 5, dpi = "print")
