@@ -112,6 +112,7 @@ Criteria <-
   Table_Max %>% left_join(Table_Min, by = "Material")
 
 rm(Table_Max, Table_Min)
+
 ## Filtering the Database for the Cristalization process  
 
 Cristallization <- 
@@ -141,6 +142,23 @@ Table_AUC_value <-
     AUC_Value = AUC( x = Ts, y = Value) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
   )
 
+## Calculating the peak temperature of crystallization
+
+Peak_Crist <-
+  DSC%>% filter(Time > 1550, Time < 4100 ) %>% 
+  group_by(Material) %>% 
+  slice_max(Value, n = 1) %>% 
+  arrange(Material, Ts ) %>% 
+  select(Material, Ts) %>% 
+  set_names("Material",  "Temp.peak")
+
+
+Table_Peak_Crist <-
+  Peak_Crist %>% 
+  group_by(Material) %>%
+  summarise(
+    Peak_Crist = findpeaks ( Value,npeaks=1, sortstr= FALSE ) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
+  )
 
 ## Graphiques de Cristallization with the calculation of the Area Under the Curve
 Cristallization %>% 
@@ -157,7 +175,7 @@ Cristallization %>%
                ) +
   labs(title = "This is the Cristallization",
        subtitle = "for the Three materials",
-       x = "Axix X",
+       x = "Axis X",
        y = "Axis Y",
        caption = "Made from love") +
   theme_minimal()
@@ -166,7 +184,76 @@ ggsave("Cristallization.jpg", width = 7, height = 5, dpi = "print")
 
 ####
 # Melting -----
-####
+
+## Calculating the min and max lines----
+
+
+Table_Min <- 
+  DSC%>% filter(Time > 2200, Time < 4200 ) %>% 
+  group_by(Material) %>% 
+  slice_min(Ts, n = 1) %>% 
+  arrange(Material, Time) %>% 
+  select(Material, Time) %>% 
+  set_names("Material", "Time.t3")
+
+Table_Max <- 
+  DSC %>% 
+  filter(Time > 4000 & Time < 5900) %>% 
+  group_by(Material) %>% 
+  slice_max(Ts, n = 1) %>% 
+  arrange(Material, Time) %>% 
+  select(Material, Time) %>% 
+  set_names("Material", "Time.t4")
+
+Criteria_Melt<- 
+  Table_Min %>% left_join(Table_Max, by = "Material")
+
+rm(Table_Min, Table_Max)
+
+## Filtering the Database for the Melting process  
+
+Melting <- 
+  DSC %>% 
+  group_by(Material) %>%
+  inner_join(Criteria_Melt) %>% 
+  filter(Time > Time.t3 & Time < Time.t4)
+
+## Calculating the Area Under the Curve ----
+AUC_Melt <- 
+  tibble(
+    Material = c("pBC", "rHDPE", "rPET"),
+    Temp.3 = c(230, 120, 210),
+    Temp.4 = c(260, 150, 260))
+
+AUC_value_Melt <- 
+  Melting %>% 
+  group_by(Material) %>%
+  inner_join(AUC_Melt, by = "Material") %>% 
+  filter(Ts > Temp.3 & Ts < Temp.4 )
+
+Table_AUC_value_Melt <- 
+  AUC_value_Melt  %>% 
+  summarise(
+    AUC_value_Melt = AUC( x = Ts, y = Value) # Evaluating the AUC but filterint between each rage from the table AUC_Melt
+  )
+
+## Calculating the peak temperature of Melting 
+
+Peak_Melt <-
+  DSC%>% filter(Time > 3000, Time < 5900 ) %>% 
+  group_by(Material) %>% 
+  slice_min(Value, n = 1) %>% 
+  arrange(Material, Ts ) %>% 
+  select(Material, Ts) %>% 
+  set_names("Material",  "Temp.peak")
+
+
+Table_Peak_Melt <-
+  Peak_Melt %>% 
+  group_by(Material) %>%
+  summarise(
+    Peak_Melt = findpeaks ( Value,npeaks=1, sortstr= FALSE ) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
+  )
 
 ## Calculating the min and max lines----
 Table_Max <- 
@@ -178,6 +265,7 @@ Table_Max <-
   select(Material, Time) %>% 
   set_names("Material", "Time.t1")
 
+## Version Fabio
 Table_Min <- 
   DSC %>% 
   filter(Time > 3400 & Time < 6000) %>% 
@@ -187,3 +275,28 @@ Table_Min <-
   select(Material, Time) %>% 
   set_names("Material", "Time.t2")
 
+
+## Version Catalina 
+## Graphiques of Melting  with the calculation of the Area Under the Curve
+Melting %>% 
+  ggplot()+
+  aes(x = Ts, y = Value, color = Material) +
+  facet_wrap( ~ Material, ncol = 1 ) +
+  geom_line() +
+  coord_cartesian(xlim = c(100 , 270)) +
+  #geom_point(size = 1) 
+  geom_polygon(data = AUC_value_Melt, 
+               aes(x = Ts, 
+                   y = Value, 
+                   fill = Material),
+  ) +
+  labs(title = "This is the Melting",
+       subtitle = "for the Three materials",
+       x = "Axis X",
+       y = "Axis Y",
+       caption = "Made from love") +
+  theme_minimal()
+
+
+
+ggsave("Melting.jpg", width = 7, height = 5, dpi = "print")
