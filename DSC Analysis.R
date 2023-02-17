@@ -168,5 +168,22 @@ ggsave("Cristallization.jpg", width = 7, height = 5, dpi = "print")
 # Melting -----
 ####
 
+## Calculating the min and max lines----
+Table_Max <- 
+  DSC %>% 
+  filter(Time > 3400 & Time < 6000) %>% 
+  group_by(Material) %>% 
+  slice_max(Ts, n = 1) %>% 
+  arrange(Material, Time) %>% 
+  select(Material, Time) %>% 
+  set_names("Material", "Time.t1")
 
+Table_Min <- 
+  DSC %>% 
+  filter(Time > 3400 & Time < 6000) %>% 
+  group_by(Material) %>% 
+  slice_min(Ts, n = 1) %>% 
+  arrange(Material, Time) %>% 
+  select(Material, Time) %>% 
+  set_names("Material", "Time.t2")
 
