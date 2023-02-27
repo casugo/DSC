@@ -287,7 +287,31 @@ ggsave("Melting.jpg", width = 7, height = 5, dpi = "print")
 
 
 
+Melting %>% 
+  ggplot()+
+  aes(x = Ts, y = Value, color = Material) +
+  facet_wrap( ~ Material, ncol = 1 ) +
+  geom_line() +
+  coord_cartesian(xlim = c(100 , 270)) +
+  #geom_point(size = 1) 
+  geom_polygon(data = AUC_value_Melt, 
+               aes(x = Ts, 
+                   y = Value, 
+                   fill = Material)+
+                 geom_text(data = Peak_Melt, 
+                           aes(x = c(250, 130, 250), y = c(-1,-3,-1)), 
+                           label = Peak_Melt$Temp.peak,
+                           vjust = 1,
+                           hjust=0),
+  )+
+  labs(title = "Melting curves",
+       # subtitle = "for the Three materials",
+       x = "Temperature [°C]",
+       y = "Heating flow [W/g]",
+       caption = "Made from love") +
+  theme_minimal()
 
+ggsave("Melting.jpg", width = 7, height = 5, dpi = "print")
 
 
 
