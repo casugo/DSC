@@ -30,7 +30,7 @@ files <-
   here::here("Data") %>%
   dir( recursive=TRUE, full.names=TRUE, pattern="\\.csv$")
 
-files
+
 
 ### Function to identify the names of the data ----
 names <- 
@@ -145,7 +145,7 @@ Table_AUC_value <-
 ## Calculating the peak temperature of crystallization
 
 Peak_Crist <-
-  DSC%>% filter(Time > 1550, Time < 4100 ) %>% 
+  DSC %>% filter(Time > 1550, Time < 4100 ) %>% 
   group_by(Material) %>% 
   slice_max(Value, n = 1) %>% 
   arrange(Material, Ts ) %>% 
@@ -157,7 +157,7 @@ Table_Peak_Crist <-
   Peak_Crist %>% 
   group_by(Material) %>%
   summarise(
-    Peak_Crist = findpeaks ( Value,npeaks=1, sortstr= FALSE ) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
+    Peak_Crist = findpeaks( AUC_value,npeaks=1, sortstr= FALSE ) # Evaluating the AUC but filterint between each rage from the table AUC_cristal
   )
 
 ## Graphiques de Cristallization with the calculation of the Area Under the Curve
@@ -306,7 +306,7 @@ Melting %>%
        caption = "Made from love") +
   theme_minimal()
 
-<<<<<<< HEAD
+
 ggsave("Melting.jpg", width = 7, height = 5, dpi = "print")
 
 
